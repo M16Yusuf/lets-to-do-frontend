@@ -1,69 +1,77 @@
-// import { Button, Radio } from "antd";
-// import Search from "antd/es/input/Search";
-// import { useState } from "react";
-
-// function App() {
-//   const [isloading, setIsLoading] = useState(true);
-//   const [color, setColor] = useState("white");
-//   return (
-//     <div style={{ backgroundColor: `${color}` }}>
-//       <Search
-//         placeholder="Search by title ..."
-//         enterButton="Search"
-//         loading={isloading}
-//         onSearch={(e) => {
-//           setColor(e);
-//           console.log(color);
-//         }}
-//         allowClear
-//       ></Search>
-
-//       <Radio.Group
-//         className="text-w"
-//         options={[
-//           { value: 1, label: "test 1" },
-//           { value: 2, label: "test 2" },
-//           { value: 3, label: "test 3" },
-//         ]}
-//         onChange={(e) => {
-//           console.log(e.target.value);
-//         }}
-//       ></Radio.Group>
-
-//       <Button
-//         color="red"
-//         variant="solid"
-//         onClick={() => {
-//           setIsLoading(!isloading);
-//         }}
-//       >
-//         toggle loading
-//       </Button>
-//     </div>
-//   );
-// }
-
-// export default App;
-
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input, Button, Card, List, Pagination, Select, Space } from "antd";
+import { useSearchParams } from "react-router";
+
+import { useTodos } from "./../contexts/todo/useTodo";
 
 const { Search } = Input;
 const { Option } = Select;
 
 export default function TodoListMockup() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [todos] = useState([
-    { id: 1, title: "Learn React", category: "Work" },
-    { id: 2, title: "Read a book", category: "Personal" },
-    { id: 3, title: "Buy groceries", category: "Home" },
-  ]);
+  const { todos, loading, fetchTodos } = useTodos();
 
-  const handleSearch = (value) => {
-    console.log("Search:", value);
-    setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1000);
+  // searchparam
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = searchParams.get("page") || "1";
+  const sort = searchParams.get("sort") || "desc";
+  const query = searchParams.get("query") || "";
+  const [searchValue, setSearchValue] = useState(query);
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    let changed = false;
+
+    if (!params.get("page")) {
+      params.set("page", "1");
+      changed = true;
+    }
+
+    if (!params.get("sort")) {
+      params.set("sort", "desc");
+      changed = true;
+    }
+
+    if (changed) setSearchParams(params);
+  }, [searchParams]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearchParams((prev) => {
+        const params = new URLSearchParams(prev);
+        if (searchValue) {
+          params.set("query", searchValue);
+          params.set("page", "1"); // reset ke halaman 1 ketika search berubah
+        } else {
+          params.delete("query");
+        }
+        return params;
+      });
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [searchValue, setSearchParams]);
+
+  const handleSortToggle = () => {
+    setSearchParams({
+      page,
+      sort: sort === "asc" ? "desc" : "asc",
+    });
   };
+
+  const handlePageChange = (newPage) => {
+    setSearchParams((prev) => {
+      const params = new URLSearchParams(prev);
+      params.set("page", newPage);
+      return params;
+    });
+  };
+
+  useEffect(() => {
+    fetchTodos(searchParams.toString());
+  }, [searchParams]);
+
+  useEffect(() => {
+    console.log(todos);
+  }, [todos, fetchTodos]);
 
   return (
     <div
@@ -86,35 +94,14 @@ export default function TodoListMockup() {
           marginBottom: "16px",
         }}
       >
-        <Search
+        <Input
           placeholder="Search by title ..."
-          enterButton="Search"
-          loading={isLoading}
-          onSearch={handleSearch}
-          style={{ flex: 1 }}
+          onChange={(e) => setSearchValue(e.target.value)}
         />
-        <Button type="primary" size="large">
-          Add Todo
+        <Button type="default" onClick={handleSortToggle}>
+          Short : {searchParams.get("sort")}
         </Button>
-      </div>
-
-      {/* Filter */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginBottom: 16,
-        }}
-      >
-        <Select
-          placeholder="Filter by category"
-          style={{ width: 220 }}
-          allowClear
-        >
-          <Option value="Work">Work</Option>
-          <Option value="Personal">Personal</Option>
-          <Option value="Home">Home</Option>
-        </Select>
+        <Button type="primary">Add Todo</Button>
       </div>
 
       {/* Todo List */}
@@ -125,27 +112,35 @@ export default function TodoListMockup() {
           overflow: "hidden",
         }}
       >
-        <List
-          dataSource={todos}
-          renderItem={(item) => (
-            <List.Item
-              key={item.id}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "12px 16px",
-              }}
-            >
-              <span>{item.title}</span>
-              <span style={{ color: "#999" }}>{item.category}</span>
-            </List.Item>
-          )}
-        />
+        {!loading && todos?.data && (
+          <List
+            dataSource={todos.data}
+            renderItem={(item) => (
+              <List.Item
+                key={item.id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "12px 16px",
+                }}
+              >
+                <span>{item.title}</span>
+                <span style={{ color: "#999" }}>{item.category}</span>
+              </List.Item>
+            )}
+          />
+        )}
       </Card>
 
       {/* Pagination */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
-        <Pagination defaultCurrent={1} total={20} />
+        {!loading && todos?.pagenation?.total && (
+          <Pagination
+            defaultCurrent={1}
+            total={todos.pagenation.total}
+            onChange={handlePageChange}
+          />
+        )}
       </div>
     </div>
   );
