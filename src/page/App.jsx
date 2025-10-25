@@ -12,6 +12,7 @@ import formatDateAndCheckPast from "./../utils/timestampToData";
 // component
 import AddTodoModal from "./../components/AddTodoModal";
 import ViewTodoModal from "./../components/ViewTodoModal";
+import CategoryManagerModal from "../components/CategoryManagerModal";
 
 const { Option } = Select;
 
@@ -24,6 +25,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedTodoId, setSelectedTodoId] = useState(null);
+  const [openCategoryModal, setOpenCategoryModal] = useState(false);
 
   // searchparam
   const [searchParams, setSearchParams] = useSearchParams();
@@ -158,26 +160,22 @@ export default function App() {
         </Button>
 
         {/* Category Select */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            minWidth: "150px",
-            flex: "0 0 auto",
+        <Button
+          type="primary"
+          onClick={() => {
+            setOpenCategoryModal(true);
           }}
         >
-          <label style={{ fontSize: "8px", fontFamily: "sans-serif" }}>
-            not implemented yet
-          </label>
-          <Select placeholder="Category" style={{ width: "100%" }}>
-            {categories?.data &&
-              categories.data.map((item) => (
-                <Option key={item.id} value={item.id}>
-                  {item.name}
-                </Option>
-              ))}
-          </Select>
-        </div>
+          Manage Categories
+        </Button>
+
+        {/* category modal */}
+        <CategoryManagerModal
+          open={openCategoryModal}
+          onClose={() => setOpenCategoryModal(false)}
+          categories={categories.data}
+          onUpdated={fetchCategories}
+        />
 
         {/* Add Button */}
         <Button
