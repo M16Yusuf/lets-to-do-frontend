@@ -15,7 +15,7 @@ import ViewTodoModal from "./../components/ViewTodoModal";
 
 const { Option } = Select;
 
-export default function TodoListMockup() {
+export default function App() {
   const { todos, loading, fetchTodos } = useTodos();
   const { categories, fetchCategories } = useCategories();
 
@@ -106,6 +106,10 @@ export default function TodoListMockup() {
   const handleViewDetail = (id) => {
     setSelectedTodoId(id);
     setViewModalOpen(true);
+  };
+
+  const handleRefreshTodos = () => {
+    fetchTodos(searchParams.toString());
   };
 
   return (
@@ -270,6 +274,7 @@ export default function TodoListMockup() {
         open={viewModalOpen}
         onCancel={() => setViewModalOpen(false)}
         todoId={selectedTodoId}
+        onUpdated={handleRefreshTodos}
       />
     </div>
   );
