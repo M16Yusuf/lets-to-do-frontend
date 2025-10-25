@@ -111,6 +111,21 @@ If you had more time, what would you improve?
 
 - Add backend unit tests for repository and handler layers.
 
+## 🖼️ Screenshots
+
+<div align="center">
+
+<img src="/demo/demo_utama.png" loading="lazy" width="370px">
+<img src="/demo/demo_addtodo.png" loading="lazy" width="370px"> </br>
+<img src="/demo/demo_detailtodo.png" loading="lazy" width="370px">
+<img src="/demo/demo_edittodo.png" loading="lazy" width="370px"> </br>
+
+<img src="/demo/demo_managecategories.png" loading="lazy" width="370px">
+<img src="/demo/demo_createcategory.png" loading="lazy" width="370px"></br>
+<img src="/demo/demo_editcategory.png" loading="lazy" width="370px">
+
+</div>
+
 ## 📧 Contact Info
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/m16yusuf/)
