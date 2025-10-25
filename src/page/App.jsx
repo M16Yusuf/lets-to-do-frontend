@@ -275,6 +275,7 @@ export default function App() {
         onCancel={() => setViewModalOpen(false)}
         todoId={selectedTodoId}
         onUpdated={handleRefreshTodos}
+        categories={categories.data}
       />
     </div>
   );
